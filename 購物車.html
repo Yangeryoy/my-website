@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>點餐系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        h1, h3 {
+            text-align: center;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 10px;
+            margin: 5px;
+            width: 100%;
+            max-width: 250px;
+            box-sizing: border-box;
+        }
+
+        .menu {
+            display: none;
+        }
+
+        .menu ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .menu li {
+            margin: 5px 0;
+        }
+
+        .cart table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .cart td, .cart th {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .cart th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>點餐系統</h1>
+
+    <div>
+        <!-- 類別按鈕 -->
+        <button onclick="showMenu('noodles')">麵類</button>
+        <button onclick="showMenu('beans')">豆類</button>
+        <button onclick="showMenu('hotpot')">火鍋料</button>
+        <button onclick="showMenu('meat')">肉類</button>
+        <button onclick="showMenu('vegetables')">蔬菜</button>
+        <button onclick="showMenu('drinks')">飲料</button>
+    </div>
+
+    <!-- 麵類菜單 -->
+    <div id="noodles" class="menu">
+        <h3>麵類菜單</h3>
+        <ul>
+            <li>
+                <span>牛肉麵</span>
+                <span>價格：$100</span>
+                <label>數量：</label>
+                <input type="number" id="qty-noodles-1" value="1" min="1">
+                <button onclick="addToCart('牛肉麵', 100, 'qty-noodles-1')">加入購物車</button>
+            </li>
+            <li>
+                <span>炸醬麵</span>
+                <span>價格：$80</span>
+                <label>數量：</label>
+                <input type="number" id="qty-noodles-2" value="1" min="1">
+                <button onclick="addToCart('炸醬麵', 80, 'qty-noodles-2')">加入購物車</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 豆類菜單 -->
+    <div id="beans" class="menu">
+        <h3>豆類菜單</h3>
+        <ul>
+            <li>
+                <span>紅豆湯</span>
+                <span>價格：$50</span>
+                <label>數量：</label>
+                <input type="number" id="qty-beans-1" value="1" min="1">
+                <button onclick="addToCart('紅豆湯', 50, 'qty-beans-1')">加入購物車</button>
+            </li>
+            <li>
+                <span>豆腐</span>
+                <span>價格：$40</span>
+                <label>數量：</label>
+                <input type="number" id="qty-beans-2" value="1" min="1">
+                <button onclick="addToCart('豆腐', 40, 'qty-beans-2')">加入購物車</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 火鍋料菜單 -->
+    <div id="hotpot" class="menu">
+        <h3>火鍋料菜單</h3>
+        <ul>
+            <li>
+                <span>鴨血</span>
+                <span>價格：$60</span>
+                <label>數量：</label>
+                <input type="number" id="qty-hotpot-1" value="1" min="1">
+                <button onclick="addToCart('鴨血', 60, 'qty-hotpot-1')">加入購物車</button>
+            </li>
+            <li>
+                <span>毛肚</span>
+                <span>價格：$90</span>
+                <label>數量：</label>
+                <input type="number" id="qty-hotpot-2" value="1" min="1">
+                <button onclick="addToCart('毛肚', 90, 'qty-hotpot-2')">加入購物車</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 肉類菜單 -->
+    <div id="meat" class="menu">
+        <h3>肉類菜單</h3>
+        <ul>
+            <li>
+                <span>牛排</span>
+                <span>價格：$200</span>
+                <label>數量：</label>
+                <input type="number" id="qty-meat-1" value="1" min="1">
+                <button onclick="addToCart('牛排', 200, 'qty-meat-1')">加入購物車</button>
+            </li>
+            <li>
+                <span>豬肉</span>
+                <span>價格：$150</span>
+                <label>數量：</label>
+                <input type="number" id="qty-meat-2" value="1" min="1">
+                <button onclick="addToCart('豬肉', 150, 'qty-meat-2')">加入購物車</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 蔬菜菜單 -->
+    <div id="vegetables" class="menu">
+        <h3>蔬菜菜單</h3>
+        <ul>
+            <li>
+                <span>小白菜</span>
+                <span>價格：$40</span>
+                <label>數量：</label>
+                <input type="number" id="qty-vegetables-1" value="1" min="1">
+                <button onclick="addToCart('小白菜', 40, 'qty-vegetables-1')">加入購物車</button>
+            </li>
+            <li>
+                <span>空心菜</span>
+                <span>價格：$30</span>
+                <label>數量：</label>
+                <input type="number" id="qty-vegetables-2" value="1" min="1">
+                <button onclick="addToCart('空心菜', 30, 'qty-vegetables-2')">加入購物車</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 飲料菜單 -->
+    <div id="drinks" class="menu">
+        <h3>飲料菜單</h3>
+        <ul>
+            <li>
+                <span>珍珠奶茶</span>
+                <span>價格：$60</span>
+                <label>數量：</label>
+                <input type="number" id="qty-drinks-1" value="1" min="1">
+                <button onclick="addToCart('珍珠奶茶', 60, 'qty-drinks-1')">加入購物車</button>
+            </li>
+            <li>
+                <span>綠茶</span>
+                <span>價格：$50</span>
+                <label>數量：</label>
+                <input type="number" id="qty-drinks-2" value="1" min="1">
+                <button onclick="addToCart('綠茶', 50, 'qty-drinks-2')">加入購物車</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 購物車 -->
+    <div class="cart">
+        <h3>購物車</h3>
+        <table id="cartTable">
+            <thead>
+                <tr>
+                    <th>餐點</th>
+                    <th>數量</th>
+                    <th>價格</th>
+                    <th>總價</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 購物車內容會動態填充 -->
+            </tbody>
+        </table>
+        <p>總金額：<span id="totalAmount">0</span> 元</p>
+        <!-- 送出訂單按鈕 -->
+        <button onclick="submitOrder()">送出訂單</button>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function showMenu(category) {
+            // 隱藏所有菜單
+            const menus = document.querySelectorAll('.menu');
+            menus.forEach(menu => menu.style.display = 'none');
+
+            // 顯示選擇的菜單
+            document.getElementById(category).style.display = 'block';
+        }
+
+        function addToCart(name, price, qtyId) {
+            const quantity = parseInt(document.getElementById(qtyId).value);
+            const itemIndex = cart.findIndex(item => item.name === name);
+
+            if (itemIndex === -1) {
+                cart.push({ name, price, quantity });
+            } else {
+                cart[itemIndex].quantity += quantity;
+            }
+
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartTable = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
+            cartTable.innerHTML = '';  // 清空表格
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const row = cartTable.insertRow();
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>
+                        <button onclick="changeQuantity(${index}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="changeQuantity(${index}, 1)">+</button>
+                    </td>
+                    <td>${item.price}</td>
+                    <td>${item.price * item.quantity}</td>
+                    <td><button onclick="removeItem(${index})">刪除</button></td>
+                `;
+                total += item.price * item.quantity;
+            });
+
+            document.getElementById('totalAmount').textContent = total;
+        }
+
+        function changeQuantity(index, change) {
+            const item = cart[index];
+            let newQuantity = item.quantity + change;
+
+            if (newQuantity === 0) {
+                const confirmDelete = confirm("數量為 0，是否刪除此餐點？");
+                if (confirmDelete) {
+                    removeItem(index);
+                } else {
+                    item.quantity = 1; // 如果選擇否，將數量設為 1
+                    updateCart();
+                }
+            } else {
+                item.quantity = newQuantity;
+                updateCart();
+            }
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function submitOrder() {
+            if (cart.length === 0) {
+                alert("購物車為空，無法提交訂單！");
+                return;
+            }
+
+            let orderDetails = "訂單內容：\n";
+            cart.forEach(item => {
+                orderDetails += `${item.name} x ${item.quantity} - $${item.price * item.quantity}\n`;
+            });
+
+            orderDetails += `總金額：$${document.getElementById('totalAmount').textContent}`;
+            alert(orderDetails);  // 顯示訂單內容
+
+            // 清空購物車
+            cart = [];
+            updateCart();
+        }
+    </script>
+</body>
+</html>
