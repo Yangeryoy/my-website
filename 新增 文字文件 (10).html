@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>´ú¸Õµæ³æ</title>
+</head>
+
+<body>
+
+<h1>µæ³æ</h1>
+<div id="menu"></div>
+
+<script>
+
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRHoRwK52PyrYbxHYxfI3P0dzhkNJHdkcsj5y7obE1Wyfy4wc01IBQlaXP2TWzDXAfqTGBCI9LqmX/pub?gid=908591430&single=true&output=csv")
+.then(res => res.text())
+.then(text => {
+
+  const rows = text.split("\n");
+
+  let html = "";
+
+  rows.forEach(row => {
+
+    const cols = row.split(",");
+
+    const name = cols[2];
+    const price = cols[3];
+
+    if (!name) return;
+
+    html += `<p>${name} - $${price}</p>`;
+
+  });
+
+  document.getElementById("menu").innerHTML = html;
+
+});
+
+</script>
+
+</body>
+</html>
