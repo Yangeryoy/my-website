@@ -49,21 +49,23 @@
     let menuData = [];
     let cart = {};
 
-    async function fetchMenu() {
-        try {
-            const response = await fetch(CSV_URL + '&t=' + new Date().getTime());
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
-            menuData = rows.map(row => {
-                const cols = row.split(',');
-                return { name: cols[0]?.trim(), price: parseInt(cols[1]?.replace(/[^0-9]/g, '')) };
-            }).filter(item => item.name && !isNaN(item.price));
-            document.getElementById('loading').style.display = 'none';
-            renderMenu();
-        } catch (error) {
-            document.getElementById('loading').innerText = '載入失敗，請檢查網路。';
-        }
-    }
+    async function loadMenu() {
+
+    const res = await fetch(CSV_URL);
+    const text = await res.text();
+
+    const rows = text.trim().split("\n").slice(1);
+
+    menu = rows.map(r => {
+        const c = r.split(",");
+        return {
+            name: c[2],
+            price: Number(c[3]?.replace(/[^0-9]/g, ""))
+        };
+    }).filter(i => i.name && i.price);
+
+    renderMenu();
+}
 
     function renderMenu() {
         const list = document.getElementById('menu-list');
