@@ -1,8 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>測試菜單</title>
+<title>點餐系統</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+.item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+
+button {
+  padding: 5px 10px;
+  margin-left: 5px;
+}
+
+#cart {
+  margin-top: 30px;
+  border-top: 2px solid #000;
+  padding-top: 10px;
+}
+</style>
 </head>
 
 <body>
@@ -10,32 +35,100 @@
 <h1>菜單</h1>
 <div id="menu"></div>
 
+<h2>🛒 購物車</h2>
+<div id="cart"></div>
+<h3 id="total">總金額：$0</h3>
+
+<button onclick="clearCart()">清空購物車</button>
+
 <script>
 
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRHoRwK52PyrYbxHYxfI3P0dzhkNJHdkcsj5y7obE1Wyfy4wc01IBQlaXP2TWzDXAfqTGBCI9LqmX/pub?gid=908591430&single=true&output=csv")
-.then(res => res.text())
-.then(text => {
+const CSV_URL = "你的CSV網址";
 
-  const rows = text.split("\n");
+let cart = [];
+
+async function loadMenu() {
+
+  const res = await fetch(CSV_URL);
+  const text = await res.text();
+
+  const rows = text.trim().split("\n");
 
   let html = "";
 
-  rows.forEach(row => {
+  for (let i = 1; i < rows.length; i++) {
 
-    const cols = row.split(",");
+    const cols = rows[i].split(",");
 
     const name = cols[2];
-    const price = cols[3];
+    const price = Number(cols[3].replace(/[^0-9]/g, ""));
 
-    if (!name) return;
+    if (!name) continue;
 
-    html += `<p>${name} - $${price}</p>`;
-
-  });
+    html += `
+      <div class="item">
+        <h3>${name}</h3>
+        <p>$${price}</p>
+        <button onclick="addToCart('${name}', ${price})">加入</button>
+      </div>
+    `;
+  }
 
   document.getElementById("menu").innerHTML = html;
+}
 
-});
+function addToCart(name, price) {
+
+  let item = cart.find(i => i.name === name);
+
+  if (item) {
+    item.qty++;
+  } else {
+    cart.push({ name, price, qty: 1 });
+  }
+
+  renderCart();
+}
+
+function renderCart() {
+
+  let html = "";
+  let total = 0;
+
+  cart.forEach((item, index) => {
+
+    total += item.price * item.qty;
+
+    html += `
+      <div>
+        ${item.name} - $${item.price} × ${item.qty}
+        <button onclick="changeQty(${index}, -1)">-</button>
+        <button onclick="changeQty(${index}, 1)">+</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("cart").innerHTML = html;
+  document.getElementById("total").innerText = "總金額：$" + total;
+}
+
+function changeQty(index, delta) {
+
+  cart[index].qty += delta;
+
+  if (cart[index].qty <= 0) {
+    cart.splice(index, 1);
+  }
+
+  renderCart();
+}
+
+function clearCart() {
+  cart = [];
+  renderCart();
+}
+
+loadMenu();
 
 </script>
 
