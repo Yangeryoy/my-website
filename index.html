@@ -93,8 +93,8 @@ button {
 
 <script>
 
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRHoRwK52PyrYbxHYxfI3P0dzhkNJHdkcsj5y7obE1Wyfy4wc01IBQlaXP2TWzDXAfqTGBCI9LqmX/pub?gid=908591430&single=true&output=csv";
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHM06FUjOZUFenUITTPJoMBMyW4wuals5AURi3ae5936laQBbRiQoWUYoYmKiQj-4-/exec";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRHoRwK52PyrYbxHYxfI3P0dzhkNJHdkcsj5y7obE1Wyfy4wc01IBQlaXP2TWzDXAfqTGBCI9LqmX/pub?gid=908591430&single=true&output=csv";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHM06FUjOZUFenUITTPJoMBMyW4wuals5AURi3ae5936laQBbRiQoWUYoYmKiQj-4-/exec";
 
 let cart = {};
 let menu = [];
@@ -107,12 +107,13 @@ async function loadMenu() {
     const rows = text.trim().split("\n").slice(1);
 
     menu = rows.map(r => {
-        const c = r.split(",");
+        const c = r.replace(/"/g, "").split(",");
+
         return {
             name: c[2],
-            price: Number(c[3]?.replace(/[^0-9]/g, ""))
+            price: Number(c[3])
         };
-    }).filter(i => i.name && i.price);
+    }).filter(i => i.name && !isNaN(i.price));
 
     renderMenu();
 }
@@ -125,7 +126,7 @@ function renderMenu() {
                 <b>${item.name}</b><br>
                 $${item.price}
             </div>
-            <button class="add" onclick="add('${item.name}', ${item.price})">加入</button>
+            <button class="add" onclick="add(\`${item.name}\`, ${item.price})">加入</button>
         </div>
     `).join("");
 }
@@ -155,11 +156,11 @@ function renderCart() {
         html += `
         <div>
             <b>${name}</b>
-            <button class="qty-btn" onclick="change('${name}', -1)">-</button>
+            <button class="qty-btn" onclick="change(\`${name}\`, -1)">-</button>
             ${item.qty}
-            <button class="qty-btn" onclick="change('${name}', 1)">+</button>
+            <button class="qty-btn" onclick="change(\`${name}\`, 1)">+</button>
             $${subtotal}
-            <button class="del" onclick="removeItem('${name}')">X</button>
+            <button class="del" onclick="removeItem(\`${name}\`)">X</button>
         </div>
         `;
     }
@@ -194,6 +195,7 @@ async function sendOrder() {
     const orderId = Date.now();
 
     let items = [];
+    let total = 0;
 
     for (let name in cart) {
         items.push({
@@ -201,17 +203,23 @@ async function sendOrder() {
             qty: cart[name].qty,
             price: cart[name].price
         });
+
+        total += cart[name].price * cart[name].qty;
     }
 
     const order = {
         orderId: orderId,
         items: items,
-        total: document.getElementById("total").innerText
+        total: total
     };
 
     await fetch(SCRIPT_URL, {
         method: "POST",
-        body: JSON.stringify(order)
+        mode: "no-cors",
+        body: JSON.stringify(order),
+        headers: {
+            "Content-Type": "text/plain"
+        }
     });
 
     alert("訂單已送出");
@@ -226,5 +234,3 @@ loadMenu();
 
 </body>
 </html>
-
-   
