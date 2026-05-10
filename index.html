@@ -1,55 +1,105 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XXX Cafe~ 雲端點餐</title>
-    <style>
-        :root { --main-color: #6f4e37; --bg-color: #fdfaf6; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: auto; }
-        h1 { text-align: center; color: var(--main-color); margin-bottom: 25px; }
-        .section { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
-        .item:last-child { border-bottom: none; }
-        .item-info b { font-size: 1.1em; display: block; margin-bottom: 4px; }
-        .price { color: #e67e22; font-weight: bold; }
-        button { cursor: pointer; border: none; transition: 0.3s; border-radius: 8px; }
-        .add-btn { background: var(--main-color); color: white; padding: 8px 16px; font-size: 0.9em; }
-        .send-btn { background: #28a745; color: white; width: 100%; padding: 15px; font-size: 1.2em; font-weight: bold; margin-top: 15px; }
-        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-        .qty-btn { background: #f1f2f6; color: #333; padding: 4px 10px; margin: 0 5px; }
-        .del-btn { background: #ff4757; color: white; padding: 4px 10px; font-size: 0.8em; margin-left: 10px; }
-        .total { font-size: 1.5em; text-align: right; color: #d35400; font-weight: bold; margin-top: 15px; }
-        #loading { text-align: center; padding: 20px; color: #888; font-style: italic; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>完整點餐系統</title>
+
+<style>
+body {
+    font-family: "Microsoft JhengHei", sans-serif;
+    background: #f7f3ee;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+.item {
+    background: white;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+}
+
+.add {
+    background: #6f4e37;
+    color: white;
+    padding: 6px 12px;
+}
+
+.cart {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.qty-btn {
+    background: #eee;
+    padding: 3px 8px;
+    margin: 0 3px;
+}
+
+.del {
+    background: red;
+    color: white;
+    padding: 3px 8px;
+}
+
+.send {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background: green;
+    color: white;
+    font-size: 18px;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    <h1>☕ XXX Cafe~</h1>
-    <div class="section">
-        <h3>📖 今日菜單</h3>
-        <p id="loading">讀取最新價目表中...</p>
-        <div id="menu-list"></div>
-    </div>
-    <div class="section">
-        <h3>🛒 我的訂單明細</h3>
-        <div id="cart-list"><p style="color:#aaa;">尚未選擇品項</p></div>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-        <div class="total">總金額: $<span id="total-price">0</span></div>
-        <button onclick="sendOrder()" class="send-btn">✅ 確認送出訂單</button>
-    </div>
+
+<h1>☕ 點餐系統</h1>
+
+<div id="menu"></div>
+
+<div class="cart">
+    <h2>🛒 購物車</h2>
+    <div id="cart"></div>
+    <h3 id="total">總金額：$0</h3>
+
+    <button class="send" onclick="sendOrder()">送出訂單</button>
+</div>
+
 </div>
 
 <script>
+
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRHoRwK52PyrYbxHYxfI3P0dzhkNJHdkcsj5y7obE1Wyfy4wc01IBQlaXP2TWzDXAfqTGBCI9LqmX/pub?gid=908591430&single=true&output=csv";
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCotzpt_0btMQFkF9hNT2EnT4w6kEKmni8NaDa-CYFJBSntU_qvuglUvGTm-yHyDNsYQ/exec";
-    let menuData = [];
-    let cart = {};
 
-    async function loadMenu() {
+let cart = {};
+let menu = [];
+
+async function loadMenu() {
 
     const res = await fetch(CSV_URL);
     const text = await res.text();
@@ -67,99 +117,114 @@
     renderMenu();
 }
 
-    function renderMenu() {
-        const list = document.getElementById('menu-list');
-        list.innerHTML = menuData.map(item => `
-            <div class="item">
-                <div class="item-info"><b>${item.name}</b><span class="price">$${item.price}</span></div>
-                <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">點餐</button>
-            </div>`).join('');
+function renderMenu() {
+
+    document.getElementById("menu").innerHTML = menu.map(item => `
+        <div class="item">
+            <div>
+                <b>${item.name}</b><br>
+                $${item.price}
+            </div>
+            <button class="add" onclick="add('${item.name}', ${item.price})">加入</button>
+        </div>
+    `).join("");
+}
+
+function add(name, price) {
+
+    if (!cart[name]) {
+        cart[name] = { price: price, qty: 1 };
+    } else {
+        cart[name].qty++;
     }
 
-    function addToCart(name, price) {
-        if (!cart[name]) cart[name] = { price, qty: 1 };
-        else cart[name].qty++;
-        renderCart();
+    renderCart();
+}
+
+function renderCart() {
+
+    let html = "";
+    let total = 0;
+
+    for (let name in cart) {
+
+        const item = cart[name];
+        const subtotal = item.price * item.qty;
+        total += subtotal;
+
+        html += `
+        <div>
+            <b>${name}</b>
+            <button class="qty-btn" onclick="change('${name}', -1)">-</button>
+            ${item.qty}
+            <button class="qty-btn" onclick="change('${name}', 1)">+</button>
+            $${subtotal}
+            <button class="del" onclick="removeItem('${name}')">X</button>
+        </div>
+        `;
     }
 
-    function updateQty(name, change) {
-        if (cart[name]) {
-            cart[name].qty += change;
-            if (cart[name].qty <= 0) delete cart[name];
-            renderCart();
-        }
+    document.getElementById("cart").innerHTML = html || "空的";
+    document.getElementById("total").innerText = "總金額：$" + total;
+}
+
+function change(name, val) {
+
+    cart[name].qty += val;
+
+    if (cart[name].qty <= 0) {
+        delete cart[name];
     }
 
-    function removeFromCart(name) {
-        if (confirm(`確定要移除「${name}」嗎？`)) {
-            delete cart[name];
-            renderCart();
-        }
+    renderCart();
+}
+
+function removeItem(name) {
+    delete cart[name];
+    renderCart();
+}
+
+async function sendOrder() {
+
+    if (Object.keys(cart).length === 0) {
+        alert("購物車是空的");
+        return;
     }
 
-    function renderCart() {
-        const list = document.getElementById('cart-list');
-        let total = 0;
-        const keys = Object.keys(cart);
-        if (keys.length === 0) {
-            list.innerHTML = '<p style="color:#aaa;">尚未選擇品項</p>';
-        } else {
-            list.innerHTML = keys.map(name => {
-                const subtotal = cart[name].price * cart[name].qty;
-                total += subtotal;
-                return `
-                    <div class="cart-item">
-                        <span><b>${name}</b><br>
-                            <button class="qty-btn" onclick="updateQty('${name}', -1)">-</button>
-                            ${cart[name].qty}
-                            <button class="qty-btn" onclick="updateQty('${name}', 1)">+</button>
-                        </span>
-                        <span>$${subtotal}<button class="del-btn" onclick="removeFromCart('${name}')">刪除</button></span>
-                    </div>`;
-            }).join('');
-        }
-        document.getElementById('total-price').innerText = total;
+    const orderId = Date.now();
+
+    let items = [];
+
+    for (let name in cart) {
+        items.push({
+            name: name,
+            qty: cart[name].qty,
+            price: cart[name].price
+        });
     }
 
-    async function sendOrder() {
-        const total = document.getElementById('total-price').innerText;
-        if (total === "0") return alert("購物車是空的！");
+    const order = {
+        orderId: orderId,
+        items: items,
+        total: document.getElementById("total").innerText
+    };
 
-        let details = "";
-        for (let name in cart) {
-            details += `${name} x ${cart[name].qty}; `;
-        }
+    await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(order)
+    });
 
-        const btn = document.querySelector('.send-btn');
-        btn.innerText = "正在傳送訂單...";
-        btn.disabled = true;
+    alert("訂單已送出");
 
-        try {
-            // 使用 URLSearchParams 是發送到 Google Script 最穩定的方式
-            const formData = new URLSearchParams();
-            formData.append('details', details);
-            formData.append('total', total);
+    cart = {};
+    renderCart();
+}
 
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', 
-                body: formData
-            });
+loadMenu();
 
-            alert("訂單已送出並記錄！");
-            cart = {};
-            renderCart();
-        } catch (e) {
-            alert("送出失敗，請確認網路！");
-        } finally {
-            btn.innerText = "✅ 確認送出訂單";
-            btn.disabled = false;
-            window.scrollTo(0, 0);
-        }
-    }
-
-    fetchMenu();
 </script>
+
 </body>
 </html>
 
+   
